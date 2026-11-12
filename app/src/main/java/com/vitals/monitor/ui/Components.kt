@@ -23,6 +23,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.vitals.monitor.data.Snapshot
+import kotlin.math.abs
 
 val Good = Color(0xFF4ADE80)
 val Warn = Color(0xFFFBBF24)
@@ -142,7 +143,8 @@ fun Sparkline(values: List<Float>, color: Color = MaterialTheme.colorScheme.prim
         if (values.size < 2) return@Canvas
         val lo = minY ?: values.min()
         val rawHi = values.max()
-        val hi = if (rawHi - lo < 1e-6f) lo + 1f else rawHi
+        val span = (rawHi - lo).let { if (it < 1e-6f) maxOf(abs(rawHi), 1f) else it }
+        val hi = rawHi + span * 0.15f // headroom so flat/max values don't hug the top edge
         val step = size.width / (values.size - 1)
         val p = Path()
         values.forEachIndexed { i, v ->
